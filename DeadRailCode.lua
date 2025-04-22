@@ -7,10 +7,12 @@ local Section = Tab:NewSection("ITEM")
 local highlightConnection
 local highlightsEnabled = false
 
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
 Section:NewToggle("Highlight", "Open to Highlight all items", function(state) 
 	highlightsEnabled = state
 
-	-- ใช้หา path ปลอดภัย
 	local function safeWait(path)
 		local current = workspace
 		for _, name in ipairs(path) do
@@ -20,7 +22,6 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 		return current
 	end
 
-	-- เจาะหา GeneralStore Zombies แบบปลอดภัย
 	local generalStoreZombiesFolder = nil
 	local randomBuildings = workspace:FindFirstChild("RandomBuildings")
 	if randomBuildings then
@@ -33,7 +34,6 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 		end
 	end
 
-	-- เจาะหา Baseplate Animals แบบปลอดภัย
 	local baseplateAnimalsFolder = nil
 	local baseplates = workspace:FindFirstChild("Baseplates")
 	if baseplates then
@@ -46,10 +46,8 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 		end
 	end
 
-	-- เจาะหา NightEnemies
 	local nightEnemiesFolder = safeWait({"NightEnemies"})
 
-	-- รายการโฟลเดอร์ทั้งหมด
 	local folders = {
 		{folder = safeWait({"RuntimeItems"}), forceRefresh = true},
 		{folder = safeWait({"RuntimeEnemies"}), forceRefresh = false},
@@ -61,27 +59,40 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 	}
 
 	local connections = {}
+	local highlightThread
 
-	-- สร้าง highlight ให้ Model
 	local function applyHighlight(model, force)
-		if model:IsA("Model") then
-			local existing = model:FindFirstChildOfClass("Highlight")
-			if existing and force then
-				existing:Destroy()
-				existing = nil
-			end
+		if not model:IsA("Model") then return end
+		if not model:FindFirstChildOfClass("Humanoid") then return end
 
-			if not existing then
-				local highlight = Instance.new("Highlight")
-				highlight.FillColor = Color3.fromRGB(255, 255, 0)
-				highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-				highlight.FillTransparency = 0.5
-				highlight.Parent = model
-			end
+		local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+		local hrp = character:FindFirstChild("HumanoidRootPart")
+		if not hrp then return end
+
+		local part = model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart")
+		if not part then return end
+
+		local distance = (hrp.Position - part.Position).Magnitude
+		if distance > 50 then
+			removeHighlight(model)
+			return
+		end
+
+		local existing = model:FindFirstChildOfClass("Highlight")
+		if existing and force then
+			existing:Destroy()
+			existing = nil
+		end
+
+		if not existing then
+			local highlight = Instance.new("Highlight")
+			highlight.FillColor = Color3.fromRGB(255, 255, 0)
+			highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+			highlight.FillTransparency = 0.5
+			highlight.Parent = model
 		end
 	end
 
-	-- ลบ highlight
 	local function removeHighlight(model)
 		local highlight = model:FindFirstChildOfClass("Highlight")
 		if highlight then
@@ -94,12 +105,10 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 			local folder = entry.folder
 			local force = entry.forceRefresh
 			if folder then
-				-- highlight ที่มีอยู่
 				for _, model in ipairs(folder:GetDescendants()) do
 					applyHighlight(model, force)
 				end
 
-				-- highlight อัตโนมัติเมื่อมีสิ่งใหม่เข้ามา
 				local connection = folder.DescendantAdded:Connect(function(model)
 					if highlightsEnabled and model:IsA("Model") then
 						applyHighlight(model, force)
@@ -109,8 +118,30 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 				table.insert(connections, connection)
 			end
 		end
+
+		-- เพิ่ม loop ตรวจสอบตลอดเวลา
+		highlightThread = task.spawn(function()
+			while highlightsEnabled do
+				local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+				local hrp = character:FindFirstChild("HumanoidRootPart")
+				if hrp then
+					for _, entry in ipairs(folders) do
+						local folder = entry.folder
+						local force = entry.forceRefresh
+						if folder then
+							for _, model in ipairs(folder:GetDescendants()) do
+								if model:IsA("Model") and model:FindFirstChildOfClass("Humanoid") then
+									applyHighlight(model, force)
+								end
+							end
+						end
+					end
+				end
+				task.wait(0.5)
+			end
+		end)
+
 	else
-		-- ลบ highlight ทั้งหมดเมื่อปิด
 		for _, entry in ipairs(folders) do
 			if entry.folder then
 				for _, model in ipairs(entry.folder:GetDescendants()) do
@@ -119,11 +150,15 @@ Section:NewToggle("Highlight", "Open to Highlight all items", function(state)
 			end
 		end
 
-		-- ปิด connection
 		for _, conn in ipairs(connections) do
 			conn:Disconnect()
 		end
 		connections = {}
+
+		if highlightThread then
+			task.cancel(highlightThread)
+			highlightThread = nil
+		end
 	end
 end)
 
