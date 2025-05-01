@@ -58,3 +58,33 @@ Section:NewToggle("AutoMeleeStat", "Up Melee Stat", function(state)
         print("AutoStat Off")
     end
 end)
+local args = {
+	"fire",
+	[3] = "economy",
+	[4] = "Crowbar",
+	[5] = 50
+}
+
+local isAutoSaleEnabled = false
+
+-- Toggle สำหรับ AutoSale
+Section:NewToggle("AutoSale", "Auto Fire Crowbar", function(state)
+    isAutoSaleEnabled = state
+
+    if state then
+        task.spawn(function()
+            while isAutoSaleEnabled do
+                task.wait(0.1)
+                local args = {
+                    "fire",
+                    [3] = "economy",
+                    [4] = "Crowbar",
+                    [5] = 50
+                }
+                game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("NetworkFramework"):WaitForChild("NetworkEvent"):FireServer(unpack(args))
+            end
+        end)
+    else
+        print("AutoSale Off")
+    end
+end)
