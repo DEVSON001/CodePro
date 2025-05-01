@@ -15,7 +15,7 @@ Section:NewToggle("AutoSkill", "Beta", function(state)
         -- Skill Z
         task.spawn(function()
             while isAutoSkillEnabled do
-                task.wait(6.5)
+                task.wait(0.1)
                 local args = { "Smelly", "z" }
                 game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Action"):FireServer(unpack(args))
             end
