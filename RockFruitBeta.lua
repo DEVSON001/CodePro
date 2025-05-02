@@ -1,50 +1,35 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("RockFruit ByMrSon.", "DarkTheme")
+
+-- แท็บและเซคชั่น
 local Tab = Window:NewTab("AutoFarm")
 local Section = Tab:NewSection("Smelly AutoSkill")
 
--- สถานะสำหรับ AutoSkill และ AutoStat
+-- ตัวแปรสถานะ
 local isAutoSkillEnabled = false
 local isAutoStatEnabled = false
+local isAutoSaleEnabled = false
 
--- Toggle สำหรับ AutoSkill
+-- AutoSkill
 Section:NewToggle("AutoSkill", "Beta", function(state)
     isAutoSkillEnabled = state
+    print("AutoSkill:", state and "On" or "Off")
 
     if state then
-        -- Skill Z
         task.spawn(function()
             while isAutoSkillEnabled do
                 task.wait(0.1)
-                local args = { "Smelly", "z" }
+                local args = { "SmellyV2", "z" }
                 game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Action"):FireServer(unpack(args))
             end
         end)
-
-        -- Skill X
-        task.spawn(function()
-            while isAutoSkillEnabled do
-                task.wait(0.2)
-                local args = { "Smelly", "x" }
-                game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Action"):FireServer(unpack(args))
-            end
-        end)
-
-        -- Skill V
-        task.spawn(function()
-            while isAutoSkillEnabled do
-                task.wait(0.2)
-                local args = { "Smelly", "v" }
-                game:GetService("ReplicatedStorage"):WaitForChild("Remote"):WaitForChild("Action"):FireServer(unpack(args))
-            end
-        end)
-    else
-        print("AutoSkill Off")
     end
 end)
 
+-- AutoMeleeStat
 Section:NewToggle("AutoMeleeStat", "Up Melee Stat", function(state)
     isAutoStatEnabled = state
+    print("AutoMeleeStat:", state and "On" or "Off")
 
     if state then
         task.spawn(function()
@@ -54,22 +39,13 @@ Section:NewToggle("AutoMeleeStat", "Up Melee Stat", function(state)
                 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("System"):FireServer(unpack(args))
             end
         end)
-    else
-        print("AutoStat Off")
     end
 end)
-local args = {
-	"fire",
-	[3] = "economy",
-	[4] = "Crowbar",
-	[5] = 50
-}
 
-local isAutoSaleEnabled = false
-
--- Toggle สำหรับ AutoSale
+-- AutoSale
 Section:NewToggle("AutoSale", "Auto Fire Crowbar", function(state)
     isAutoSaleEnabled = state
+    print("AutoSale:", state and "On" or "Off")
 
     if state then
         task.spawn(function()
@@ -84,7 +60,13 @@ Section:NewToggle("AutoSale", "Auto Fire Crowbar", function(state)
                 game:GetService("ReplicatedStorage"):WaitForChild("Modules"):WaitForChild("NetworkFramework"):WaitForChild("NetworkEvent"):FireServer(unpack(args))
             end
         end)
-    else
-        print("AutoSale Off")
     end
+end)
+
+-- ปุ่มหยุดทั้งหมด
+Section:NewButton("Stop All", "ปิด Auto ทั้งหมด", function()
+    isAutoSkillEnabled = false
+    isAutoStatEnabled = false
+    isAutoSaleEnabled = false
+    print("หยุดการทำงานทั้งหมดแล้ว")
 end)
