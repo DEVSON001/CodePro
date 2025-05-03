@@ -38,7 +38,7 @@ local function useSkills(remoteSkill, toolName, skillOrder)
         elseif skill == "x" then
             task.wait(1.5)
         elseif skill == "v" then
-            task.wait(0.7)
+            task.wait(0.85)
         elseif skill == "c" then
             task.wait(2.5)
         end
@@ -111,7 +111,7 @@ local function startFarm(isHaki)
                     farmNormal(remoteSkill, toolName)
                 end
 
-                task.wait(3.3)
+                task.wait(3.15)
             end
 
             -- สลับฟาร์มจุด 1 และ 2 จำนวน 10 รอบ
