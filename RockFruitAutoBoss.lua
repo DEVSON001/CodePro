@@ -111,7 +111,7 @@ local function startFarm(isHaki)
                     farmNormal(remoteSkill, toolName)
                 end
 
-                task.wait(3.5)
+                task.wait(3.3)
             end
 
             -- สลับฟาร์มจุด 1 และ 2 จำนวน 10 รอบ
