@@ -84,18 +84,22 @@ end
 -- ระบบฟาร์มวนลูป
 local function startFarm(isHaki)
     task.spawn(function()
+        local hakiActivated = false -- เพิ่มตัวแปรเพื่อตรวจสอบว่าเปิด Haki ไปแล้วหรือยัง
+
         while autoFarmEnabled do
             local char = player.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
+            -- เปิด Haki แค่ครั้งเดียว
+            if isHaki and not hakiActivated then
+                activateHaki()
+                hakiActivated = true
+                task.wait(0.5)
+            end
+
             -- ฟาร์มบอส 10 รอบ
             for i = 1, 20 do
                 remoteBoss:FireServer("fire", nil, "SummonBoss", "Vasto Hollow")
-
-                if isHaki then
-                    activateHaki()
-                    task.wait(0.5)
-                end
 
                 if hrp then
                     hrp.CFrame = CFrame.new(-2201.386962890625, 16.510194778442383, -506.6521911621094)
