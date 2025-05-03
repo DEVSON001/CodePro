@@ -84,7 +84,7 @@ end
 -- ระบบฟาร์มวนลูป
 local function startFarm(isHaki)
     task.spawn(function()
-        local hakiActivated = false -- เพิ่มตัวแปรเพื่อตรวจสอบว่าเปิด Haki ไปแล้วหรือยัง
+        local hakiActivated = false
 
         while autoFarmEnabled do
             local char = player.Character
