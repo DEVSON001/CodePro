@@ -94,7 +94,6 @@ local function startFarm(isHaki)
             if isHaki and not hakiActivated then
                 activateHaki()
                 hakiActivated = true
-                task.wait(0.5)
             end
 
             -- ฟาร์มบอส 10 รอบ
@@ -103,6 +102,7 @@ local function startFarm(isHaki)
 
                 if hrp then
                     hrp.CFrame = CFrame.new(-2201.386962890625, 16.510194778442383, -506.6521911621094)
+                         task.wait(0.5125)
                 end
 
                 if isHaki then
@@ -111,7 +111,7 @@ local function startFarm(isHaki)
                     farmNormal(remoteSkill, toolName)
                 end
 
-                task.wait(3.2)
+                task.wait(3.5)
             end
 
             -- สลับฟาร์มจุด 1 และ 2 จำนวน 10 รอบ
